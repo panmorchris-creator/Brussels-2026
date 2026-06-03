@@ -1,0 +1,22 @@
+{
+  "name": "Erasmus Savings Tracker",
+  "short_name": "Erasmus",
+  "description": "Πλάνο αποταμίευσης για Βρυξέλλες 2026",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#1a2744",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
