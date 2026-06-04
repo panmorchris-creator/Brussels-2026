@@ -13,446 +13,152 @@
 <title>Erasmus Savings Tracker</title>
 <style>
   :root {
-    --navy: #0d1b3e;
-    --navy2: #152349;
-    --blue: #1e3a6e;
-    --accent: #4f8ef7;
-    --accent2: #7eb8ff;
-    --green: #22c55e;
-    --green-dim: #166534;
-    --red: #ef4444;
-    --yellow: #fbbf24;
-    --yellow-dim: #92400e;
-    --text: #e8edf8;
-    --text-dim: #8899bb;
-    --card: #111e40;
-    --card2: #162553;
-    --border: rgba(79,142,247,0.15);
-    --border2: rgba(79,142,247,0.3);
-    --income-bg: rgba(34,197,94,0.08);
-    --fixed-bg: rgba(239,68,68,0.08);
-    --save-bg: rgba(79,142,247,0.1);
-    --r: 16px;
-    --r2: 12px;
+    --navy:#0d1b3e; --navy2:#152349; --blue:#1e3a6e;
+    --accent:#4f8ef7; --accent2:#7eb8ff;
+    --green:#22c55e; --green-dim:#166534;
+    --red:#ef4444; --yellow:#fbbf24;
+    --text:#e8edf8; --text-dim:#8899bb;
+    --card:#111e40; --card2:#162553;
+    --border:rgba(79,142,247,0.15); --border2:rgba(79,142,247,0.3);
+    --income-bg:rgba(34,197,94,0.08);
+    --fixed-bg:rgba(239,68,68,0.08);
+    --save-bg:rgba(79,142,247,0.1);
+    --r:16px; --r2:12px;
   }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Syne',sans-serif;background:var(--navy);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(79,142,247,0.18) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 90% 80%,rgba(34,197,94,0.08) 0%,transparent 50%);pointer-events:none;z-index:0;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  .header{position:sticky;top:0;z-index:100;background:rgba(13,27,62,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 16px 0;}
+  .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .header h1{font-size:17px;font-weight:800;} .header h1 span{color:var(--accent);}
+  .header-sub{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:1px;}
+  .reset-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);border-radius:8px;padding:6px 10px;font-size:11px;font-family:'Syne',sans-serif;cursor:pointer;}
+  .reset-btn:active{background:rgba(239,68,68,0.15);color:var(--red);border-color:var(--red);}
+  .tabs{display:flex;overflow-x:auto;gap:6px;padding-bottom:12px;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text-dim);cursor:pointer;transition:all 0.2s;}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 20px rgba(79,142,247,0.35);}
 
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--navy);
-    color: var(--text);
-    min-height: 100vh;
-    min-height: 100dvh;
-    overflow-x: hidden;
-  }
+  main{position:relative;z-index:1;padding:0 0 100px;}
+  .page{display:none;padding:14px 14px 0;}
+  .page.active{display:block;}
 
-  /* ── BACKGROUND ── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79,142,247,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 90% 80%, rgba(34,197,94,0.08) 0%, transparent 50%);
-    pointer-events: none; z-index: 0;
-  }
+  /* DASHBOARD */
+  .dashboard-hero{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--border2);border-radius:var(--r);padding:18px;margin-bottom:10px;text-align:center;}
+  .hero-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-bottom:6px;}
+  .hero-amount{font-size:44px;font-weight:800;letter-spacing:-2px;color:var(--green);line-height:1;transition:all 0.4s;}
+  .hero-amount.zero{color:var(--text-dim);}
+  .hero-sub{font-size:12px;color:var(--text-dim);margin-top:5px;font-family:'DM Mono',monospace;}
+  .hero-target{font-size:12px;color:var(--accent2);margin-top:3px;font-weight:600;}
 
-  /* ── HEADER ── */
-  .header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(13,27,62,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 20px 14px;
-  }
-  .header-top {
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .header h1 {
-    font-size: 17px; font-weight: 800; letter-spacing: -0.3px;
-    color: var(--text);
-  }
-  .header h1 span { color: var(--accent); }
-  .header-sub {
-    font-size: 11px; color: var(--text-dim); font-weight: 400;
-    margin-top: 2px; font-family: 'DM Mono', monospace;
-  }
-  .reset-btn {
-    background: none; border: 1px solid var(--border2);
-    color: var(--text-dim); border-radius: 8px;
-    padding: 6px 10px; font-size: 11px; font-family: 'Syne', sans-serif;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .reset-btn:active { background: rgba(239,68,68,0.15); color: var(--red); border-color: var(--red); }
+  .progress-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+  .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .progress-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);}
+  .progress-pct{font-size:20px;font-weight:800;color:var(--accent);font-family:'DM Mono',monospace;}
+  .progress-track{background:rgba(79,142,247,0.12);border-radius:999px;height:10px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);position:relative;}
+  .progress-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:rgba(255,255,255,0.6);border-radius:999px;}
+  .progress-nums{display:flex;justify-content:space-between;margin-top:7px;font-family:'DM Mono',monospace;font-size:11px;}
+  .progress-saved{color:var(--green);} .progress-left{color:var(--red);}
 
-  /* ── TABS ── */
-  .tabs {
-    display: flex; overflow-x: auto; gap: 6px;
-    padding: 14px 20px 0;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex-shrink: 0;
-    padding: 8px 16px; border-radius: 20px;
-    font-size: 13px; font-weight: 600;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text-dim);
-    cursor: pointer; transition: all 0.2s;
-  }
-  .tab.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-    box-shadow: 0 4px 20px rgba(79,142,247,0.35);
-  }
+  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);margin:14px 0 8px;}
+  .month-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .month-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+  .month-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);border-radius:3px 0 0 3px;transition:background 0.3s;}
+  .month-card.done::before{background:var(--green);}
+  .month-card:active{transform:scale(0.99);background:var(--card2);}
+  .month-icon{width:34px;height:34px;border-radius:10px;background:var(--save-bg);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .month-info{flex:1;min-width:0;}
+  .month-name{font-size:14px;font-weight:700;}
+  .month-detail{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:2px;}
+  .month-right{text-align:right;flex-shrink:0;}
+  .month-saved{font-size:15px;font-weight:800;color:var(--green);font-family:'DM Mono',monospace;}
+  .month-saved.zero{color:var(--text-dim);}
+  .month-target{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;}
+  .month-chevron{color:var(--text-dim);font-size:14px;margin-left:4px;}
 
-  /* ── MAIN ── */
-  main {
-    position: relative; z-index: 1;
-    padding: 0 0 100px;
-  }
+  .kpi-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:var(--r2);padding:12px 14px;font-size:13px;font-weight:600;color:var(--yellow);text-align:center;line-height:1.5;margin-bottom:10px;}
+  .kpi-box.success{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.3);color:var(--green);}
 
-  .page { display: none; padding: 16px 16px 0; }
-  .page.active { display: block; }
+  /* MONTH PAGE */
+  .month-header{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+  .month-header-title{font-size:20px;font-weight:800;}
+  .month-header-sub{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:3px;}
 
-  /* ── DASHBOARD ── */
-  .dashboard-hero {
-    background: linear-gradient(135deg, var(--card2) 0%, var(--card) 100%);
-    border: 1px solid var(--border2);
-    border-radius: var(--r);
-    padding: 20px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .hero-label {
-    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
-    color: var(--text-dim); font-family: 'DM Mono', monospace; margin-bottom: 8px;
-  }
-  .hero-amount {
-    font-size: 44px; font-weight: 800; letter-spacing: -2px;
-    color: var(--green); line-height: 1;
-    transition: all 0.4s;
-  }
-  .hero-amount.zero { color: var(--text-dim); }
-  .hero-sub {
-    font-size: 12px; color: var(--text-dim); margin-top: 6px;
-    font-family: 'DM Mono', monospace;
-  }
-  .hero-target {
-    font-size: 12px; color: var(--accent2); margin-top: 4px;
-    font-weight: 600;
-  }
+  .balance-box{border-radius:var(--r);padding:16px;margin-bottom:10px;text-align:center;border:1px solid;transition:all 0.3s;}
+  .balance-box.positive{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.3);}
+  .balance-box.negative{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.3);}
+  .balance-box.pending{background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2);}
+  .balance-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-bottom:5px;}
+  .balance-amount{font-size:36px;font-weight:800;letter-spacing:-1.5px;transition:all 0.3s;}
+  .balance-box.positive .balance-amount{color:var(--green);}
+  .balance-box.negative .balance-amount{color:var(--red);}
+  .balance-box.pending .balance-amount{color:var(--yellow);}
+  .balance-planned{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:3px;}
 
-  /* ── PROGRESS BAR ── */
-  .progress-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .progress-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 12px;
-  }
-  .progress-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
-  .progress-pct {
-    font-size: 20px; font-weight: 800; color: var(--accent);
-    font-family: 'DM Mono', monospace;
-  }
-  .progress-track {
-    background: rgba(79,142,247,0.12);
-    border-radius: 999px; height: 10px; overflow: hidden;
-    position: relative;
-  }
-  .progress-fill {
-    height: 100%; border-radius: 999px;
-    background: linear-gradient(90deg, var(--accent) 0%, var(--green) 100%);
-    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative; min-width: 0;
-  }
-  .progress-fill::after {
-    content: '';
-    position: absolute; right: 0; top: 0; bottom: 0;
-    width: 4px; background: rgba(255,255,255,0.6);
-    border-radius: 999px;
-  }
-  .progress-nums {
-    display: flex; justify-content: space-between;
-    margin-top: 8px; font-family: 'DM Mono', monospace; font-size: 11px;
-  }
-  .progress-saved { color: var(--green); }
-  .progress-left { color: var(--red); }
+  /* ADJUSTMENT BADGE */
+  .adj-badge{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
+  .adj-badge.up{background:rgba(34,197,94,0.15);color:var(--green);}
+  .adj-badge.down{background:rgba(239,68,68,0.15);color:var(--red);}
+  .adj-badge.neutral{display:none;}
 
-  /* ── MONTH SUMMARY CARDS ── */
-  .section-title {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 2px; color: var(--text-dim);
-    margin: 16px 0 8px;
-  }
+  .section-header{display:flex;align-items:center;gap:8px;margin:14px 0 8px;}
+  .section-header-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);}
+  .section-header-line{flex:1;height:1px;background:var(--border);}
 
-  .month-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .row-card{border-radius:var(--r2);border:1px solid var(--border);overflow:hidden;margin-bottom:8px;}
+  .row-card.income{border-color:rgba(34,197,94,0.25);}
+  .row-card.fixed{border-color:rgba(239,68,68,0.2);}
+  .row-card.savings{border-color:rgba(79,142,247,0.25);}
+  .row-top{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;}
+  .row-card.income .row-top{background:var(--income-bg);}
+  .row-card.fixed .row-top{background:var(--fixed-bg);}
+  .row-card.savings .row-top{background:var(--save-bg);}
+  .row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+  .row-card.income .row-dot{background:var(--green);}
+  .row-card.fixed .row-dot{background:var(--red);}
+  .row-card.savings .row-dot{background:var(--accent);}
+  .row-label{flex:1;font-size:13px;font-weight:600;line-height:1.3;}
+  .row-amounts{text-align:right;flex-shrink:0;}
+  .row-planned{font-size:12px;color:var(--text-dim);font-family:'DM Mono',monospace;}
+  /* adjusted suggested amount */
+  .row-suggested{font-size:12px;font-family:'DM Mono',monospace;font-weight:700;margin-top:1px;}
+  .row-suggested.up{color:var(--green);}
+  .row-suggested.down{color:var(--red);}
+  .row-suggested.neutral{display:none;}
 
-  .month-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--r2);
-    padding: 14px 16px;
-    display: flex; align-items: center; gap: 12px;
-    cursor: pointer; transition: all 0.2s;
-    position: relative; overflow: hidden;
-  }
-  .month-card::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-    width: 3px; background: var(--accent);
-    border-radius: 3px 0 0 3px;
-    transition: background 0.3s;
-  }
-  .month-card.done::before { background: var(--green); }
-  .month-card:active { transform: scale(0.99); background: var(--card2); }
+  .row-input-wrap{padding:9px 13px 11px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);}
+  .row-input-label{font-size:11px;color:var(--text-dim);white-space:nowrap;flex-shrink:0;}
+  .row-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;font-weight:500;text-align:right;outline:none;transition:border-color 0.2s;-webkit-appearance:none;width:100%;}
+  .row-input:focus{border-color:var(--accent);}
+  .row-input.filled{border-color:rgba(34,197,94,0.4);color:var(--green);}
+  .row-status{flex-shrink:0;font-size:10px;font-weight:600;padding:3px 7px;border-radius:6px;white-space:nowrap;}
+  .row-status.done{background:rgba(34,197,94,0.15);color:var(--green);}
+  .row-status.pending{background:rgba(251,191,36,0.1);color:var(--yellow);}
+  .row-status.fixed-tag{background:rgba(239,68,68,0.12);color:var(--red);}
 
-  .month-icon {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: var(--save-bg); border: 1px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; flex-shrink: 0;
-  }
-  .month-info { flex: 1; min-width: 0; }
-  .month-name { font-size: 14px; font-weight: 700; }
-  .month-detail {
-    font-size: 11px; color: var(--text-dim);
-    font-family: 'DM Mono', monospace; margin-top: 2px;
-  }
-  .month-right { text-align: right; flex-shrink: 0; }
-  .month-saved { font-size: 15px; font-weight: 800; color: var(--green); font-family: 'DM Mono', monospace; }
-  .month-saved.zero { color: var(--text-dim); }
-  .month-target { font-size: 10px; color: var(--text-dim); font-family: 'DM Mono', monospace; }
-  .month-chevron { color: var(--text-dim); font-size: 14px; margin-left: 4px; }
+  .income-total{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:var(--r2);padding:9px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .income-total-label{font-size:12px;font-weight:700;color:var(--green);}
+  .income-total-val{font-size:15px;font-weight:800;color:var(--green);font-family:'DM Mono',monospace;}
 
-  /* ── KPI MESSAGE ── */
-  .kpi-box {
-    background: rgba(251,191,36,0.08);
-    border: 1px solid rgba(251,191,36,0.25);
-    border-radius: var(--r2);
-    padding: 14px 16px;
-    font-size: 13px; font-weight: 600;
-    color: var(--yellow);
-    text-align: center;
-    line-height: 1.5;
-    margin-bottom: 12px;
-  }
-  .kpi-box.success {
-    background: rgba(34,197,94,0.08);
-    border-color: rgba(34,197,94,0.3);
-    color: var(--green);
-  }
+  .deduct-total{background:var(--card2);border:1px solid var(--border);border-radius:var(--r2);padding:9px 13px;display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+  .deduct-total-label{font-size:12px;font-weight:700;color:var(--text-dim);}
+  .deduct-total-val{font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:var(--text);}
 
-  /* ── MONTH PAGE ── */
-  .month-header {
-    background: linear-gradient(135deg, var(--card2), var(--card));
-    border: 1px solid var(--border2);
-    border-radius: var(--r);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .month-header-title { font-size: 20px; font-weight: 800; }
-  .month-header-sub { font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; margin-top: 4px; }
+  /* RATIO INFO BOX */
+  .ratio-box{background:rgba(79,142,247,0.07);border:1px solid rgba(79,142,247,0.2);border-radius:var(--r2);padding:10px 13px;margin-bottom:10px;font-size:12px;color:var(--text-dim);line-height:1.5;}
+  .ratio-box strong{color:var(--accent2);}
+  .ratio-box.hidden{display:none;}
 
-  /* ── AVAILABLE BALANCE ── */
-  .balance-box {
-    border-radius: var(--r);
-    padding: 18px;
-    margin-bottom: 12px;
-    text-align: center;
-    border: 1px solid;
-    transition: all 0.3s;
-  }
-  .balance-box.positive {
-    background: rgba(34,197,94,0.08);
-    border-color: rgba(34,197,94,0.3);
-  }
-  .balance-box.zero-bal {
-    background: rgba(239,68,68,0.08);
-    border-color: rgba(239,68,68,0.3);
-  }
-  .balance-box.pending {
-    background: rgba(251,191,36,0.06);
-    border-color: rgba(251,191,36,0.2);
-  }
-  .balance-label {
-    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
-    color: var(--text-dim); font-family: 'DM Mono', monospace; margin-bottom: 6px;
-  }
-  .balance-amount {
-    font-size: 38px; font-weight: 800; letter-spacing: -1.5px;
-    transition: all 0.3s;
-  }
-  .balance-box.positive .balance-amount { color: var(--green); }
-  .balance-box.zero-bal .balance-amount { color: var(--red); }
-  .balance-box.pending .balance-amount { color: var(--yellow); }
-  .balance-planned {
-    font-size: 11px; color: var(--text-dim);
-    font-family: 'DM Mono', monospace; margin-top: 4px;
-  }
+  .bottom-hint{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(13,27,62,0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:10px 20px;padding-bottom:max(10px,env(safe-area-inset-bottom));text-align:center;font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;}
+  .toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:999;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  /* ── SECTION ── */
-  .section-header {
-    display: flex; align-items: center; gap: 8px;
-    margin: 16px 0 8px;
-  }
-  .section-header-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 2px; color: var(--text-dim);
-  }
-  .section-header-line {
-    flex: 1; height: 1px; background: var(--border);
-  }
-
-  /* ── ROW CARD ── */
-  .row-card {
-    border-radius: var(--r2);
-    border: 1px solid var(--border);
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .row-card.income { border-color: rgba(34,197,94,0.25); }
-  .row-card.fixed  { border-color: rgba(239,68,68,0.2); }
-  .row-card.savings { border-color: rgba(79,142,247,0.25); }
-
-  .row-top {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px;
-  }
-  .row-card.income .row-top  { background: var(--income-bg); }
-  .row-card.fixed .row-top   { background: var(--fixed-bg); }
-  .row-card.savings .row-top { background: var(--save-bg); }
-
-  .row-dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  }
-  .row-card.income .row-dot  { background: var(--green); }
-  .row-card.fixed .row-dot   { background: var(--red); }
-  .row-card.savings .row-dot { background: var(--accent); }
-
-  .row-label { flex: 1; font-size: 13px; font-weight: 600; line-height: 1.3; }
-  .row-planned {
-    font-size: 12px; color: var(--text-dim);
-    font-family: 'DM Mono', monospace; flex-shrink: 0;
-  }
-
-  .row-input-wrap {
-    padding: 10px 14px 12px;
-    display: flex; align-items: center; gap: 10px;
-    border-top: 1px solid var(--border);
-  }
-  .row-input-label { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
-  .row-input {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    padding: 8px 12px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 15px; font-weight: 500;
-    text-align: right;
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-    width: 100%;
-  }
-  .row-input:focus { border-color: var(--accent); }
-  .row-input.filled { border-color: rgba(34,197,94,0.4); color: var(--green); }
-
-  .row-status {
-    flex-shrink: 0;
-    font-size: 11px; font-weight: 600;
-    padding: 4px 8px; border-radius: 6px;
-    white-space: nowrap;
-  }
-  .row-status.done { background: rgba(34,197,94,0.15); color: var(--green); }
-  .row-status.pending { background: rgba(251,191,36,0.1); color: var(--yellow); }
-
-  /* ── INCOME TOTAL (multi) ── */
-  .income-total {
-    background: rgba(34,197,94,0.06);
-    border: 1px solid rgba(34,197,94,0.2);
-    border-radius: var(--r2);
-    padding: 10px 14px;
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 8px;
-  }
-  .income-total-label { font-size: 12px; font-weight: 700; color: var(--green); }
-  .income-total-val { font-size: 15px; font-weight: 800; color: var(--green); font-family: 'DM Mono', monospace; }
-
-  /* ── DEDUCTIONS TOTAL ── */
-  .deduct-total {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: var(--r2);
-    padding: 10px 14px;
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 4px;
-  }
-  .deduct-total-label { font-size: 12px; font-weight: 700; color: var(--text-dim); }
-  .deduct-total-val { font-size: 15px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); }
-
-  /* ── BOTTOM NAV (for feel) ── */
-  .bottom-hint {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    background: rgba(13,27,62,0.9);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    padding: 10px 20px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    text-align: center;
-    font-size: 11px; color: var(--text-dim);
-    font-family: 'DM Mono', monospace;
-  }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--green); color: #fff;
-    padding: 10px 20px; border-radius: 20px;
-    font-size: 13px; font-weight: 600;
-    opacity: 0; pointer-events: none;
-    transition: all 0.3s; z-index: 999;
-    white-space: nowrap;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* ── INSTALL BANNER ── */
-  .install-banner {
-    background: linear-gradient(135deg, rgba(79,142,247,0.15), rgba(34,197,94,0.1));
-    border: 1px solid var(--border2);
-    border-radius: var(--r2);
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .install-banner .icon { font-size: 20px; flex-shrink: 0; }
-  .install-banner .text { flex: 1; font-size: 12px; color: var(--text-dim); line-height: 1.4; }
-  .install-banner .text strong { color: var(--text); }
-  .install-banner .close-btn {
-    background: none; border: none; color: var(--text-dim);
-    font-size: 16px; cursor: pointer; padding: 4px; flex-shrink: 0;
-  }
-  #install-banner { display: none; }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .page.active > * { animation: fadeIn 0.3s ease forwards; }
-
-  /* ── NUMBER INPUT FIXES ── */
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input[type=number] { -moz-appearance: textfield; }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .page.active>*{animation:fadeIn 0.25s ease forwards;}
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+  input[type=number]{-moz-appearance:textfield;}
 </style>
 </head>
 <body>
@@ -465,7 +171,7 @@
     </div>
     <button class="reset-btn" onclick="confirmReset()">Επαναφορά</button>
   </div>
-  <div class="tabs" style="padding:10px 0 0">
+  <div class="tabs">
     <div class="tab active" onclick="showPage('dashboard',this)">📊 Dashboard</div>
     <div class="tab" onclick="showPage('june',this)">Ιούνιος</div>
     <div class="tab" onclick="showPage('july',this)">Ιούλιος</div>
@@ -475,22 +181,14 @@
 
 <main>
 
-<!-- ══════════════════════════════════════ DASHBOARD ══ -->
+<!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
-
-  <div id="install-banner" class="install-banner">
-    <span class="icon">📲</span>
-    <div class="text"><strong>Πρόσθεσε στην αρχική οθόνη!</strong><br>Πάτα "Κοινοποίηση" → "Στην Αρχική Οθόνη" για offline χρήση.</div>
-    <button class="close-btn" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
-  </div>
-
   <div class="dashboard-hero">
     <div class="hero-label">Συνολική Αποταμίευση</div>
-    <div class="hero-amount" id="dash-total">0 €</div>
+    <div class="hero-amount zero" id="dash-total">0 €</div>
     <div class="hero-sub" id="dash-sub">Ξεκίνα καταχωρώντας τα έσοδά σου</div>
     <div class="hero-target">Στόχος: 4.680 €</div>
   </div>
-
   <div class="progress-wrap">
     <div class="progress-header">
       <span class="progress-label">Πρόοδος</span>
@@ -504,18 +202,14 @@
       <span class="progress-left" id="dash-left">Λείπουν: 4.680 €</span>
     </div>
   </div>
-
-  <div class="kpi-box" id="dash-kpi">
-    🚀 Ξεκίνα την αποταμίευση! Στόχος: 4.680 €
-  </div>
-
+  <div class="kpi-box" id="dash-kpi">🚀 Ξεκίνα την αποταμίευση! Στόχος: 4.680 €</div>
   <div class="section-title">Ανά Μήνα</div>
   <div class="month-cards">
-    <div class="month-card" id="card-june" onclick="showPage('june', document.querySelectorAll('.tab')[1])">
+    <div class="month-card" id="card-june" onclick="showPage('june',document.querySelectorAll('.tab')[1])">
       <div class="month-icon">6️⃣</div>
       <div class="month-info">
         <div class="month-name">Ιούνιος 2026</div>
-        <div class="month-detail" id="card-june-detail">Μισθός Μαΐου · 1.450 €</div>
+        <div class="month-detail">Μισθός Μαΐου · 1.450 €</div>
       </div>
       <div class="month-right">
         <div class="month-saved zero" id="card-june-saved">0 €</div>
@@ -523,11 +217,11 @@
       </div>
       <span class="month-chevron">›</span>
     </div>
-    <div class="month-card" id="card-july" onclick="showPage('july', document.querySelectorAll('.tab')[2])">
+    <div class="month-card" id="card-july" onclick="showPage('july',document.querySelectorAll('.tab')[2])">
       <div class="month-icon">7️⃣</div>
       <div class="month-info">
         <div class="month-name">Ιούλιος 2026</div>
-        <div class="month-detail" id="card-july-detail">Μισθός Ιουνίου · 1.350 €</div>
+        <div class="month-detail">Μισθός Ιουνίου · 1.350 €</div>
       </div>
       <div class="month-right">
         <div class="month-saved zero" id="card-july-saved">0 €</div>
@@ -535,11 +229,11 @@
       </div>
       <span class="month-chevron">›</span>
     </div>
-    <div class="month-card" id="card-aug" onclick="showPage('august', document.querySelectorAll('.tab')[3])">
+    <div class="month-card" id="card-aug" onclick="showPage('august',document.querySelectorAll('.tab')[3])">
       <div class="month-icon">8️⃣</div>
       <div class="month-info">
         <div class="month-name">Αύγουστος 2026</div>
-        <div class="month-detail" id="card-aug-detail">4 πηγές εσόδων · 4.550 €</div>
+        <div class="month-detail">4 πηγές εσόδων · 4.550 €</div>
       </div>
       <div class="month-right">
         <div class="month-saved zero" id="card-aug-saved">0 €</div>
@@ -548,33 +242,28 @@
       <span class="month-chevron">›</span>
     </div>
   </div>
-
 </div>
 
-<!-- ══════════════════════════════════════ ΙΟΥΝΙΟΣ ══ -->
+<!-- ΙΟΥΝΙΟΣ -->
 <div id="page-june" class="page">
-
   <div class="month-header">
     <div class="month-header-title">Ιούνιος 2026</div>
     <div class="month-header-sub">Μισθός Μαΐου · Pay Yourself First</div>
   </div>
-
   <div class="balance-box pending" id="june-balance-box">
     <div class="balance-label">Διαθέσιμο Υπόλοιπο</div>
     <div class="balance-amount" id="june-balance">— €</div>
     <div class="balance-planned">Προγραμματισμένο: 250 €</div>
+    <div class="adj-badge neutral" id="june-adj-badge"></div>
   </div>
+  <div class="ratio-box hidden" id="june-ratio-box"></div>
 
-  <div class="section-header">
-    <span class="section-header-label">Έσοδα</span>
-    <div class="section-header-line"></div>
-  </div>
-
+  <div class="section-header"><span class="section-header-label">Έσοδα</span><div class="section-header-line"></div></div>
   <div class="row-card income">
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Μισθός Μαΐου</div>
-      <div class="row-planned">1.450 €</div>
+      <div class="row-amounts"><div class="row-planned">Πλάνο: 1.450 €</div></div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Πραγματικό:</span>
@@ -583,21 +272,21 @@
     </div>
   </div>
 
-  <div class="section-header">
-    <span class="section-header-label">Αφαιρέσεις</span>
-    <div class="section-header-line"></div>
-  </div>
+  <div class="section-header"><span class="section-header-label">Αφαιρέσεις</span><div class="section-header-line"></div></div>
 
   <div class="row-card fixed">
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Αποπληρωμή Πιστωτικής (Δόση 1/3)</div>
-      <div class="row-planned">190 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">190 €</div>
+        <div class="row-suggested neutral" id="june-sug-0">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Κατεβλήθη:</span>
       <input type="number" class="row-input" id="june-item-0" placeholder="0.00" inputmode="decimal" oninput="calcMonth('june')">
-      <span class="row-status pending" id="june-item-0-status">Εκκρεμεί</span>
+      <span class="row-status fixed-tag" id="june-item-0-status">Σταθερό</span>
     </div>
   </div>
 
@@ -605,7 +294,10 @@
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Budget Αγορών για Βαλίτσα</div>
-      <div class="row-planned">300 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">Πλάνο: 300 €</div>
+        <div class="row-suggested neutral" id="june-sug-1">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Κατεβλήθη:</span>
@@ -618,7 +310,10 @@
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Κατανάλωση Πόλης (Θεσσαλονίκη)</div>
-      <div class="row-planned">250 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">Πλάνο: 250 €</div>
+        <div class="row-suggested neutral" id="june-sug-2">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Κατεβλήθη:</span>
@@ -631,7 +326,10 @@
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Αποταμίευση → Λογ/σμός Αποταμίευσης</div>
-      <div class="row-planned">460 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">Πλάνο: 460 €</div>
+        <div class="row-suggested neutral" id="june-sug-3">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Μεταφέρθηκε:</span>
@@ -644,33 +342,28 @@
     <span class="deduct-total-label">Σύνολο Αφαιρέσεων</span>
     <span class="deduct-total-val" id="june-deduct-total">— €</span>
   </div>
-
 </div>
 
-<!-- ══════════════════════════════════════ ΙΟΥΛΙΟΣ ══ -->
+<!-- ΙΟΥΛΙΟΣ -->
 <div id="page-july" class="page">
-
   <div class="month-header">
     <div class="month-header-title">Ιούλιος 2026</div>
     <div class="month-header-sub">Μισθός Ιουνίου · Pay Yourself First</div>
   </div>
-
   <div class="balance-box pending" id="july-balance-box">
     <div class="balance-label">Διαθέσιμο Υπόλοιπο</div>
     <div class="balance-amount" id="july-balance">— €</div>
     <div class="balance-planned">Προγραμματισμένο: 0 €</div>
+    <div class="adj-badge neutral" id="july-adj-badge"></div>
   </div>
+  <div class="ratio-box hidden" id="july-ratio-box"></div>
 
-  <div class="section-header">
-    <span class="section-header-label">Έσοδα</span>
-    <div class="section-header-line"></div>
-  </div>
-
+  <div class="section-header"><span class="section-header-label">Έσοδα</span><div class="section-header-line"></div></div>
   <div class="row-card income">
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Μισθός Ιουνίου</div>
-      <div class="row-planned">1.350 €</div>
+      <div class="row-amounts"><div class="row-planned">Πλάνο: 1.350 €</div></div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Πραγματικό:</span>
@@ -679,21 +372,21 @@
     </div>
   </div>
 
-  <div class="section-header">
-    <span class="section-header-label">Αφαιρέσεις</span>
-    <div class="section-header-line"></div>
-  </div>
+  <div class="section-header"><span class="section-header-label">Αφαιρέσεις</span><div class="section-header-line"></div></div>
 
   <div class="row-card fixed">
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Αποπληρωμή Πιστωτικής (Δόση 2/3)</div>
-      <div class="row-planned">190 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">190 €</div>
+        <div class="row-suggested neutral" id="july-sug-0">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Κατεβλήθη:</span>
       <input type="number" class="row-input" id="july-item-0" placeholder="0.00" inputmode="decimal" oninput="calcMonth('july')">
-      <span class="row-status pending" id="july-item-0-status">Εκκρεμεί</span>
+      <span class="row-status fixed-tag" id="july-item-0-status">Σταθερό</span>
     </div>
   </div>
 
@@ -701,7 +394,10 @@
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Budget Διακοπών (Νάπολη / Τίρανα)</div>
-      <div class="row-planned">500 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">Πλάνο: 500 €</div>
+        <div class="row-suggested neutral" id="july-sug-1">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Κατεβλήθη:</span>
@@ -714,7 +410,10 @@
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Κατανάλωση Πόλης (Θεσσαλονίκη)</div>
-      <div class="row-planned">250 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">Πλάνο: 250 €</div>
+        <div class="row-suggested neutral" id="july-sug-2">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Κατεβλήθη:</span>
@@ -727,7 +426,10 @@
     <div class="row-top">
       <div class="row-dot"></div>
       <div class="row-label">Αποταμίευση → Λογ/σμός Αποταμίευσης</div>
-      <div class="row-planned">410 €</div>
+      <div class="row-amounts">
+        <div class="row-planned">Πλάνο: 410 €</div>
+        <div class="row-suggested neutral" id="july-sug-3">—</div>
+      </div>
     </div>
     <div class="row-input-wrap">
       <span class="row-input-label">Μεταφέρθηκε:</span>
@@ -740,388 +442,306 @@
     <span class="deduct-total-label">Σύνολο Αφαιρέσεων</span>
     <span class="deduct-total-val" id="july-deduct-total">— €</span>
   </div>
-
 </div>
 
-<!-- ══════════════════════════════════════ ΑΥΓΟΥΣΤΟΣ ══ -->
+<!-- ΑΥΓΟΥΣΤΟΣ -->
 <div id="page-august" class="page">
-
   <div class="month-header">
     <div class="month-header-title">Αύγουστος 2026</div>
     <div class="month-header-sub">4 πηγές εσόδων · Pay Yourself First</div>
   </div>
-
   <div class="balance-box pending" id="august-balance-box">
     <div class="balance-label">Διαθέσιμο Υπόλοιπο</div>
     <div class="balance-amount" id="august-balance">— €</div>
     <div class="balance-planned">Προγραμματισμένο: 350 €</div>
+    <div class="adj-badge neutral" id="august-adj-badge"></div>
   </div>
+  <div class="ratio-box hidden" id="august-ratio-box"></div>
 
-  <div class="section-header">
-    <span class="section-header-label">Έσοδα</span>
-    <div class="section-header-line"></div>
-  </div>
-
+  <div class="section-header"><span class="section-header-label">Έσοδα</span><div class="section-header-line"></div></div>
   <div class="row-card income">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Μισθός Ιουλίου</div>
-      <div class="row-planned">1.350 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Πραγματικό:</span>
-      <input type="number" class="row-input" id="august-income-0" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-income-0-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Μισθός Ιουλίου</div><div class="row-amounts"><div class="row-planned">Πλάνο: 1.350 €</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Πραγματικό:</span><input type="number" class="row-input" id="august-income-0" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status pending" id="august-income-0-status">Εκκρεμεί</span></div>
   </div>
-
   <div class="row-card income">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Εισόδημα Αυγούστου (δουλειά + πατέρας)</div>
-      <div class="row-planned">700 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Πραγματικό:</span>
-      <input type="number" class="row-input" id="august-income-1" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-income-1-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Εισόδημα Αυγούστου (δουλειά + πατέρας)</div><div class="row-amounts"><div class="row-planned">Πλάνο: 700 €</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Πραγματικό:</span><input type="number" class="row-input" id="august-income-1" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status pending" id="august-income-1-status">Εκκρεμεί</span></div>
   </div>
-
   <div class="row-card income">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Erasmus Επίδομα Α (βασικό)</div>
-      <div class="row-planned">2.200 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Πραγματικό:</span>
-      <input type="number" class="row-input" id="august-income-2" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-income-2-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Erasmus Επίδομα Α (βασικό)</div><div class="row-amounts"><div class="row-planned">Πλάνο: 2.200 €</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Πραγματικό:</span><input type="number" class="row-input" id="august-income-2" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status pending" id="august-income-2-status">Εκκρεμεί</span></div>
   </div>
-
   <div class="row-card income">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Erasmus Επίδομα Β (συμπληρωματικό)</div>
-      <div class="row-planned">300 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Πραγματικό:</span>
-      <input type="number" class="row-input" id="august-income-3" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-income-3-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Erasmus Επίδομα Β (συμπληρωματικό)</div><div class="row-amounts"><div class="row-planned">Πλάνο: 300 €</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Πραγματικό:</span><input type="number" class="row-input" id="august-income-3" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status pending" id="august-income-3-status">Εκκρεμεί</span></div>
   </div>
-
   <div class="income-total">
     <span class="income-total-label">Σύνολο Εσόδων</span>
     <span class="income-total-val" id="august-income-total">— €</span>
   </div>
 
-  <div class="section-header">
-    <span class="section-header-label">Αφαιρέσεις</span>
-    <div class="section-header-line"></div>
-  </div>
+  <div class="section-header"><span class="section-header-label">Αφαιρέσεις</span><div class="section-header-line"></div></div>
 
   <div class="row-card fixed">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Αποπληρωμή Πιστωτικής (Δόση 3/3)</div>
-      <div class="row-planned">190 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Κατεβλήθη:</span>
-      <input type="number" class="row-input" id="august-item-0" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-item-0-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Αποπληρωμή Πιστωτικής (Δόση 3/3)</div><div class="row-amounts"><div class="row-planned">190 €</div><div class="row-suggested neutral" id="august-sug-0">—</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Κατεβλήθη:</span><input type="number" class="row-input" id="august-item-0" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status fixed-tag" id="august-item-0-status">Σταθερό</span></div>
   </div>
-
   <div class="row-card fixed">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Κατανάλωση πριν αναχώρηση</div>
-      <div class="row-planned">200 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Κατεβλήθη:</span>
-      <input type="number" class="row-input" id="august-item-1" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-item-1-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Κατανάλωση πριν αναχώρηση</div><div class="row-amounts"><div class="row-planned">Πλάνο: 200 €</div><div class="row-suggested neutral" id="august-sug-1">—</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Κατεβλήθη:</span><input type="number" class="row-input" id="august-item-1" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status pending" id="august-item-1-status">Εκκρεμεί</span></div>
   </div>
-
   <div class="row-card savings">
-    <div class="row-top">
-      <div class="row-dot"></div>
-      <div class="row-label">Αποταμίευση για Βρυξέλλες → Λογ/σμός</div>
-      <div class="row-planned">3.810 €</div>
-    </div>
-    <div class="row-input-wrap">
-      <span class="row-input-label">Μεταφέρθηκε:</span>
-      <input type="number" class="row-input" id="august-item-2" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')">
-      <span class="row-status pending" id="august-item-2-status">Εκκρεμεί</span>
-    </div>
+    <div class="row-top"><div class="row-dot"></div><div class="row-label">Αποταμίευση για Βρυξέλλες → Λογ/σμός</div><div class="row-amounts"><div class="row-planned">Πλάνο: 3.810 €</div><div class="row-suggested neutral" id="august-sug-2">—</div></div></div>
+    <div class="row-input-wrap"><span class="row-input-label">Μεταφέρθηκε:</span><input type="number" class="row-input" id="august-item-2" placeholder="0.00" inputmode="decimal" oninput="calcMonth('august')"><span class="row-status pending" id="august-item-2-status">Εκκρεμεί</span></div>
   </div>
 
   <div class="deduct-total">
     <span class="deduct-total-label">Σύνολο Αφαιρέσεων</span>
     <span class="deduct-total-val" id="august-deduct-total">— €</span>
   </div>
-
 </div>
 
 </main>
 
-<div class="bottom-hint" id="bottom-hint">💾 Αποθηκεύεται αυτόματα στο κινητό σου</div>
+<div class="bottom-hint">💾 Αποθηκεύεται αυτόματα στο κινητό σου</div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ── DATA ────────────────────────────────────────────────────────
 const TARGET = 4680;
 
+// planned income, card amount (fixed), scalable items [planned, ...]
 const MONTHS = {
   june: {
-    incomeCount: 1,
-    itemCount: 4,
-    savingsIdx: 3,
     plannedIncome: 1450,
-    plannedDeduct: 1200,
+    incomeCount: 1,
+    cardFixed: 190,        // item index 0 = card, always fixed
+    items: [190, 300, 250, 460],  // planned amounts
+    fixedIdx: [0],         // indices that are FIXED (card)
+    savingsIdx: 3,
     plannedFree: 250,
-    plannedSave: 460,
   },
   july: {
-    incomeCount: 1,
-    itemCount: 4,
-    savingsIdx: 3,
     plannedIncome: 1350,
-    plannedDeduct: 1350,
+    incomeCount: 1,
+    cardFixed: 190,
+    items: [190, 500, 250, 410],
+    fixedIdx: [0],
+    savingsIdx: 3,
     plannedFree: 0,
-    plannedSave: 410,
   },
   august: {
-    incomeCount: 4,
-    itemCount: 3,
-    savingsIdx: 2,
     plannedIncome: 4550,
-    plannedDeduct: 4200,
+    incomeCount: 4,
+    cardFixed: 190,
+    items: [190, 200, 3810],
+    fixedIdx: [0],
+    savingsIdx: 2,
     plannedFree: 350,
-    plannedSave: 3810,
   }
 };
 
-// ── STORAGE ─────────────────────────────────────────────────────
-function save(key, val) {
-  try { localStorage.setItem('erasmus_' + key, val); } catch(e) {}
+function save(k,v){try{localStorage.setItem('er_'+k,v);}catch(e){}}
+function load(k){try{return localStorage.getItem('er_'+k);}catch(e){return null;}}
+
+function fmt(n){
+  if(n===null||isNaN(n))return '— €';
+  return n.toLocaleString('el-GR',{minimumFractionDigits:0,maximumFractionDigits:2})+' €';
 }
-function load(key) {
-  try { return localStorage.getItem('erasmus_' + key); } catch(e) { return null; }
+function fmtSigned(n){
+  const s = n>=0?'+':'-';
+  return s+Math.abs(n).toLocaleString('el-GR',{minimumFractionDigits:0,maximumFractionDigits:2})+' €';
 }
 
-// ── FORMAT ──────────────────────────────────────────────────────
-function fmt(n) {
-  if (n === null || n === undefined || isNaN(n)) return '— €';
-  return n.toLocaleString('el-GR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' €';
+function showPage(id,tabEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(tabEl)tabEl.classList.add('active');
+  window.scrollTo(0,0);
 }
 
-// ── NAVIGATION ──────────────────────────────────────────────────
-function showPage(id, tabEl) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  if (tabEl) tabEl.classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-// ── CALCULATE MONTH ─────────────────────────────────────────────
-function calcMonth(month) {
+function calcMonth(month){
   const m = MONTHS[month];
 
-  // Gather incomes
+  // ── Gather actual income ──
   let totalIncome = 0, anyIncome = false;
-  for (let i = 0; i < m.incomeCount; i++) {
+  for(let i=0;i<m.incomeCount;i++){
     const el = document.getElementById(`${month}-income-${i}`);
     const v = parseFloat(el.value);
     save(`${month}-income-${i}`, el.value);
-    if (!isNaN(v) && v > 0) { totalIncome += v; anyIncome = true; }
+    if(!isNaN(v)&&v>0){totalIncome+=v;anyIncome=true;}
     const st = document.getElementById(`${month}-income-${i}-status`);
-    if (!isNaN(v) && v > 0) {
-      st.textContent = 'Ελήφθη'; st.className = 'row-status done';
-      el.classList.add('filled');
-    } else {
-      st.textContent = 'Εκκρεμεί'; st.className = 'row-status pending';
-      el.classList.remove('filled');
-    }
+    if(!isNaN(v)&&v>0){st.textContent='Ελήφθη';st.className='row-status done';el.classList.add('filled');}
+    else{st.textContent='Εκκρεμεί';st.className='row-status pending';el.classList.remove('filled');}
   }
 
-  // Update income total (august)
-  if (month === 'august') {
+  // August income total display
+  if(month==='august'){
     document.getElementById('august-income-total').textContent = anyIncome ? fmt(totalIncome) : '— €';
   }
 
-  // Gather items
-  let totalDeduct = 0, anyDeduct = false;
-  let savedAmount = 0;
-  for (let i = 0; i < m.itemCount; i++) {
-    const el = document.getElementById(`${month}-item-${i}`);
-    const v = parseFloat(el.value);
-    save(`${month}-item-${i}`, el.value);
-    if (!isNaN(v) && v > 0) { totalDeduct += v; anyDeduct = true; }
-    if (i === m.savingsIdx && !isNaN(v) && v > 0) savedAmount = v;
-    const st = document.getElementById(`${month}-item-${i}-status`);
-    if (!isNaN(v) && v > 0) {
-      st.textContent = 'Ολοκληρώθηκε'; st.className = 'row-status done';
-      el.classList.add('filled');
+  // ── Compute ratio ──
+  const ratio = anyIncome ? totalIncome / m.plannedIncome : 1;
+  const diffPct = Math.round((ratio-1)*100);
+
+  // ── Update ratio info box ──
+  const ratioBox = document.getElementById(`${month}-ratio-box`);
+  const adjBadge = document.getElementById(`${month}-adj-badge`);
+  if(anyIncome && Math.abs(diffPct)>=1){
+    const dir = ratio>1 ? '▲' : '▼';
+    const color = ratio>1 ? '#22c55e' : '#ef4444';
+    ratioBox.classList.remove('hidden');
+    ratioBox.innerHTML = `<strong>${dir} Εισόδημα ${ratio>1?'+':''}${diffPct}% από το πλάνο</strong><br>
+      Τα έξοδα αναπροσαρμόζονται αναλογικά. Η πιστωτική παραμένει σταθερή στα 190 €.`;
+    ratioBox.style.borderColor = ratio>1 ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)';
+    ratioBox.style.color = color;
+    adjBadge.className = `adj-badge ${ratio>1?'up':'down'}`;
+    adjBadge.textContent = `${ratio>1?'▲':'▼'} Εισόδημα ${ratio>1?'+':''}${diffPct}%`;
+  } else {
+    ratioBox.classList.add('hidden');
+    adjBadge.className = 'adj-badge neutral';
+  }
+
+  // ── Update suggested amounts per item ──
+  m.items.forEach((planned, i) => {
+    const sugEl = document.getElementById(`${month}-sug-${i}`);
+    if(!sugEl) return;
+    const isFixed = m.fixedIdx.includes(i);
+    if(isFixed || !anyIncome || Math.abs(diffPct)<1){
+      sugEl.className='row-suggested neutral'; return;
+    }
+    const suggested = Math.round(planned * ratio);
+    const diff = suggested - planned;
+    sugEl.textContent = `Προτεινόμενο: ${fmt(suggested)}`;
+    sugEl.className = `row-suggested ${diff>=0?'up':'down'}`;
+  });
+
+  // ── Gather items ──
+  let totalDeduct=0, anyDeduct=false, savedAmount=0;
+  for(let i=0;i<m.items.length;i++){
+    const el=document.getElementById(`${month}-item-${i}`);
+    const v=parseFloat(el.value);
+    save(`${month}-item-${i}`,el.value);
+    if(!isNaN(v)&&v>0){totalDeduct+=v;anyDeduct=true;}
+    if(i===m.savingsIdx&&!isNaN(v)&&v>0)savedAmount=v;
+    const isFixed=m.fixedIdx.includes(i);
+    const st=document.getElementById(`${month}-item-${i}-status`);
+    if(!isNaN(v)&&v>0){
+      st.textContent='Ολοκληρώθηκε';st.className='row-status done';el.classList.add('filled');
     } else {
-      st.textContent = 'Εκκρεμεί'; st.className = 'row-status pending';
+      if(isFixed){st.textContent='Σταθερό';st.className='row-status fixed-tag';}
+      else{st.textContent='Εκκρεμεί';st.className='row-status pending';}
       el.classList.remove('filled');
     }
   }
 
-  // Deduct total
-  document.getElementById(`${month}-deduct-total`).textContent =
-    anyDeduct ? fmt(totalDeduct) : '— €';
+  document.getElementById(`${month}-deduct-total`).textContent = anyDeduct ? fmt(totalDeduct) : '— €';
 
-  // Balance
-  const balanceEl = document.getElementById(`${month}-balance`);
-  const boxEl = document.getElementById(`${month}-balance-box`);
-  if (anyIncome) {
-    const bal = totalIncome - totalDeduct;
-    balanceEl.textContent = fmt(bal);
-    boxEl.className = 'balance-box ' + (bal > 0 ? 'positive' : bal === 0 ? 'zero-bal' : 'zero-bal');
+  // ── Balance ──
+  const balEl=document.getElementById(`${month}-balance`);
+  const boxEl=document.getElementById(`${month}-balance-box`);
+  if(anyIncome){
+    const bal=totalIncome-totalDeduct;
+    balEl.textContent=fmt(bal);
+    boxEl.className='balance-box '+(bal>0?'positive':bal<0?'negative':'negative');
   } else {
-    balanceEl.textContent = '— €';
-    boxEl.className = 'balance-box pending';
+    balEl.textContent='— €';
+    boxEl.className='balance-box pending';
   }
 
   updateDashboard();
 }
 
-// ── UPDATE DASHBOARD ────────────────────────────────────────────
-function updateDashboard() {
-  let totalSaved = 0;
+function updateDashboard(){
+  const jSave=parseFloat(document.getElementById('june-item-3')?.value)||0;
+  const jlSave=parseFloat(document.getElementById('july-item-3')?.value)||0;
+  const aSave=parseFloat(document.getElementById('august-item-2')?.value)||0;
+  const totalSaved=jSave+jlSave+aSave;
 
-  // June savings
-  const juneSave = parseFloat(document.getElementById('june-item-3')?.value);
-  const juneAmt = isNaN(juneSave) ? 0 : juneSave;
+  const heroEl=document.getElementById('dash-total');
+  heroEl.textContent=fmt(totalSaved);
+  heroEl.className='hero-amount'+(totalSaved===0?' zero':'');
 
-  // July savings
-  const julySave = parseFloat(document.getElementById('july-item-3')?.value);
-  const julyAmt = isNaN(julySave) ? 0 : julySave;
+  const pct=Math.min(1,totalSaved/TARGET);
+  document.getElementById('dash-pct').textContent=(pct*100).toFixed(1)+'%';
+  document.getElementById('dash-bar').style.width=(pct*100)+'%';
+  document.getElementById('dash-saved').textContent='Αποταμιεύτηκαν: '+fmt(totalSaved);
+  document.getElementById('dash-left').textContent='Λείπουν: '+fmt(Math.max(0,TARGET-totalSaved));
+  document.getElementById('dash-sub').textContent=totalSaved===0?'Ξεκίνα καταχωρώντας τα έσοδά σου':`${(pct*100).toFixed(1)}% του στόχου ολοκληρώθηκε`;
 
-  // Aug savings
-  const augSave = parseFloat(document.getElementById('august-item-2')?.value);
-  const augAmt = isNaN(augSave) ? 0 : augSave;
+  const kpi=document.getElementById('dash-kpi');
+  if(totalSaved===0){kpi.textContent='🚀 Ξεκίνα την αποταμίευση! Στόχος: '+fmt(TARGET);kpi.className='kpi-box';}
+  else if(totalSaved>=TARGET){kpi.textContent='🎉 ΜΠΡΑΒΟ! Έφτασες τον στόχο σου — Καλές Βρυξέλλες!';kpi.className='kpi-box success';}
+  else{kpi.textContent=`💪 Έχεις αποταμιεύσει ${fmt(totalSaved)} — λείπουν ${fmt(TARGET-totalSaved)} για τις Βρυξέλλες!`;kpi.className='kpi-box';}
 
-  totalSaved = juneAmt + julyAmt + augAmt;
-
-  // Hero
-  const heroEl = document.getElementById('dash-total');
-  heroEl.textContent = fmt(totalSaved);
-  heroEl.className = 'hero-amount' + (totalSaved === 0 ? ' zero' : '');
-
-  const pct = Math.min(1, totalSaved / TARGET);
-  const pctStr = (pct * 100).toFixed(1) + '%';
-
-  document.getElementById('dash-pct').textContent = pctStr;
-  document.getElementById('dash-bar').style.width = (pct * 100) + '%';
-  document.getElementById('dash-saved').textContent = 'Αποταμιεύτηκαν: ' + fmt(totalSaved);
-  document.getElementById('dash-left').textContent = 'Λείπουν: ' + fmt(Math.max(0, TARGET - totalSaved));
-
-  // Sub
-  const subEl = document.getElementById('dash-sub');
-  if (totalSaved === 0) subEl.textContent = 'Ξεκίνα καταχωρώντας τα έσοδά σου';
-  else subEl.textContent = `${pctStr} του στόχου ολοκληρώθηκε`;
-
-  // KPI
-  const kpi = document.getElementById('dash-kpi');
-  if (totalSaved === 0) {
-    kpi.textContent = '🚀 Ξεκίνα την αποταμίευση! Στόχος: ' + fmt(TARGET);
-    kpi.className = 'kpi-box';
-  } else if (totalSaved >= TARGET) {
-    kpi.textContent = '🎉 ΜΠΡΑΒΟ! Έφτασες τον στόχο σου — Καλές Βρυξέλλες!';
-    kpi.className = 'kpi-box success';
-  } else {
-    kpi.textContent = `💪 Έχεις αποταμιεύσει ${fmt(totalSaved)} — σου λείπουν ${fmt(TARGET - totalSaved)} για τις Βρυξέλλες!`;
-    kpi.className = 'kpi-box';
-  }
-
-  // Month cards
-  updateCard('june', juneAmt, 460);
-  updateCard('july', julyAmt, 410);
-  updateCard('aug',  augAmt,  3810);
+  updateCard('june',jSave,460);
+  updateCard('july',jlSave,410);
+  updateCard('aug',aSave,3810);
 }
 
-function updateCard(id, saved, target) {
-  const el = document.getElementById(`card-${id}-saved`);
-  el.textContent = fmt(saved);
-  el.className = 'month-saved' + (saved === 0 ? ' zero' : '');
-  const card = document.getElementById(`card-${id}`);
-  if (saved >= target && saved > 0) card.classList.add('done');
+function updateCard(id,saved,target){
+  const el=document.getElementById(`card-${id}-saved`);
+  el.textContent=fmt(saved);
+  el.className='month-saved'+(saved===0?' zero':'');
+  const card=document.getElementById(`card-${id}`);
+  if(saved>=target&&saved>0)card.classList.add('done');
   else card.classList.remove('done');
 }
 
-// ── RESET ───────────────────────────────────────────────────────
-function confirmReset() {
-  if (confirm('Να διαγραφούν όλα τα δεδομένα;')) {
-    try { localStorage.clear(); } catch(e) {}
-    document.querySelectorAll('.row-input').forEach(el => {
-      el.value = ''; el.classList.remove('filled');
+function confirmReset(){
+  if(confirm('Να διαγραφούν όλα τα δεδομένα;')){
+    try{localStorage.clear();}catch(e){}
+    document.querySelectorAll('.row-input').forEach(el=>{el.value='';el.classList.remove('filled');});
+    document.querySelectorAll('.row-status').forEach(el=>{el.textContent='Εκκρεμεί';el.className='row-status pending';});
+    document.querySelectorAll('.row-suggested').forEach(el=>{el.className='row-suggested neutral';});
+    document.querySelectorAll('.ratio-box').forEach(el=>{el.classList.add('hidden');});
+    document.querySelectorAll('.adj-badge').forEach(el=>{el.className='adj-badge neutral';});
+    ['june','july','august'].forEach(m=>{
+      document.getElementById(`${m}-balance`).textContent='— €';
+      document.getElementById(`${m}-balance-box`).className='balance-box pending';
+      document.getElementById(`${m}-deduct-total`).textContent='— €';
     });
-    document.querySelectorAll('.row-status').forEach(el => {
-      el.textContent = 'Εκκρεμεί'; el.className = 'row-status pending';
+    document.getElementById('august-income-total').textContent='— €';
+    // restore fixed-tag statuses
+    ['june-item-0-status','july-item-0-status','august-item-0-status'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.textContent='Σταθερό';el.className='row-status fixed-tag';}
     });
-    ['june','july','august'].forEach(m => {
-      document.getElementById(`${m}-balance`).textContent = '— €';
-      document.getElementById(`${m}-balance-box`).className = 'balance-box pending';
-      document.getElementById(`${m}-deduct-total`).textContent = '— €';
-    });
-    if (document.getElementById('august-income-total'))
-      document.getElementById('august-income-total').textContent = '— €';
     updateDashboard();
     showToast('Τα δεδομένα διαγράφηκαν');
   }
 }
 
-// ── TOAST ───────────────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// ── RESTORE FROM STORAGE ────────────────────────────────────────
-function restoreAll() {
-  ['june','july','august'].forEach(month => {
-    const m = MONTHS[month];
-    for (let i = 0; i < m.incomeCount; i++) {
-      const v = load(`${month}-income-${i}`);
-      if (v) document.getElementById(`${month}-income-${i}`).value = v;
+function restoreAll(){
+  ['june','july','august'].forEach(month=>{
+    const m=MONTHS[month];
+    for(let i=0;i<m.incomeCount;i++){
+      const v=load(`${month}-income-${i}`);
+      if(v)document.getElementById(`${month}-income-${i}`).value=v;
     }
-    for (let i = 0; i < m.itemCount; i++) {
-      const v = load(`${month}-item-${i}`);
-      if (v) document.getElementById(`${month}-item-${i}`).value = v;
+    for(let i=0;i<m.items.length;i++){
+      const v=load(`${month}-item-${i}`);
+      if(v)document.getElementById(`${month}-item-${i}`).value=v;
     }
     calcMonth(month);
   });
+  // Ensure fixed-tag on card fields after restore
+  ['june-item-0-status','july-item-0-status','august-item-0-status'].forEach(id=>{
+    const el=document.getElementById(id);
+    const inp=document.getElementById(id.replace('-status',''));
+    if(el&&(!inp||!inp.value)){el.textContent='Σταθερό';el.className='row-status fixed-tag';}
+  });
 }
 
-// ── PWA ─────────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 
-// Show install banner on iOS
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isStandalone = window.navigator.standalone;
-if (isIOS && !isStandalone && !load('banner-dismissed')) {
-  document.getElementById('install-banner').style.display = 'flex';
-}
-
-// ── INIT ────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  restoreAll();
-  updateDashboard();
-});
+document.addEventListener('DOMContentLoaded',()=>{restoreAll();updateDashboard();});
 </script>
 </body>
 </html>
